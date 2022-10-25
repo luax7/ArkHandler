@@ -34,4 +34,6 @@
 })
 ```
 
+Now its ready, you can create commands and features of your heart's contents.
+###### Check the Wiki for help
 
