@@ -24,7 +24,7 @@
 
 <h3> Next, its time to create our Ark Handler intance </h3>
 
-
+```
   const Handler = new Ark(Client,{
     Owner: "YourName#123",
     CommandsDirectory: __dirname + '/commands',
@@ -32,6 +32,6 @@
     PREFIX: "!",
     RegisterDefaults: true
 })
-
+```
 
 
