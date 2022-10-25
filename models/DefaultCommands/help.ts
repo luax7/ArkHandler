@@ -1,49 +1,68 @@
-import { EmbedBuilder } from "@discordjs/builders";
+import { Embed, EmbedBuilder } from "discord.js";
 import { Command } from "../..";
-import * as fs from 'fs'
-
-
 
 export default {
 
 hidden: true,
 
-
 Callback(Message, Args, Client) {
-    if(!Client.Options.RegisterDefaults) return; else
-    if(!Client.Options.CommandsDirectory) return;
-
     const embed = new EmbedBuilder()
-    .setTitle(`Comandos de ${Client.client.user?.username}`)
-    .setFooter({
-        iconURL: Message.guild?.members.me?.avatarURL() as string,
-        text: `${Client.client.user?.username}`
-    })
-    ;
 
-    const files1 = fs.readdirSync(Client.Options.CommandsDirectory)
+    console.log(Args[0])
 
-    let rows = []
+    if(Args[0]){
+        if(require(Client.Commands[ Client.CommandsIndexing.get(Args[0])! ])){
+            const Command = require(Client.Commands[ Client.CommandsIndexing.get(Args[0])!]).default as Command;
 
-    for(let i = 0; i < files1.length; i++){
-        const row = i % 5
+            embed.setTitle(Args[0])
 
-        const file = files1[i];
-        const CommandInfo = require(Client.Options.CommandsDirectory + `/${file}`).default as Command
+            if(Command.description){
+                embed.setDescription(Command.description)
+            }
+            if(Command.category){
+                embed.addFields([
+                    {
+                        name: "Category",
+                        value: Command.category || "Non-Categorized",
+                    }
+                ])
+            }
+            if(Command.Aliases){
+                let aliaseslist = ''
 
-        rows[row]
-        
+                for(const alias of Command.Aliases){
+
+                    aliaseslist += alias
+                    aliaseslist += ', '
+
+                }
+
+                embed.addFields([
+                    {
+                        name: "Alias",
+                        value: aliaseslist,
+                        inline: true
+                    }
+                ])
+            }
+            if(Command.maxArgs || Command.minArgs){
+                embed.addFields({
+                    name: "Quantidade de argumentos",
+                    value: `Minimo: ${Command.minArgs || 0} **|** ${Command.maxArgs || 0}`,
+                    inline: true
+                })
+            }
+
+        }
+    }else{
+
     }
 
-    console.log({rows})
-
-    const message = Message.reply({
+    Message.channel.send({
         embeds: [embed]
     })
 
-
-
-
+    return
 },
 
 } as Command

@@ -73,14 +73,7 @@ const Handler = async (Command : Command, message: discordjs.Message, client: Ha
        Bate o tipo de argumento que o comando pede
        */
 
-       switch(commandInfo.ArgsType){
-        case('Joint'):
-           args = data.join(' ')
-        break;
-        case('Striped'):
-           args = data
-        break;
-       }
+       args = `${commandInfo.ArgsType == 'Joint' ? args = data.join(' ') : args = data}`
 
        /*
        E finalmente para a administraçã
@@ -94,7 +87,6 @@ const Handler = async (Command : Command, message: discordjs.Message, client: Ha
           errs++
         }
        }
-
        if(commandInfo.maxArgs)            /* Maximo de comandos de necessarios*/{
         if(data.length > commandInfo.maxArgs){
           message.reply(`Você enviou muitos argumentos , o comando **${CommandName}** requer apenas **${commandInfo.maxArgs}** argumentos `)

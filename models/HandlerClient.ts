@@ -1,24 +1,46 @@
 import * as discord from 'discord.js'
-import handlerOptions from './HandlerClientOptions';
 import * as fs from 'fs'
 import {Command, Feature} from '../'
 import Handler from '../Handler';
 import chalk from 'chalk'
+
+/**
+ * Defines the default commands embed in the handler
+ */
+ type DefaultCommands = 'purge'|'help'|'ping';
+/**
+ * 
+ * The options of the command handler
+ * 
+ */
+type HandlerClientOptions = {
+  CommandsDirectory?: string;
+  FeaturesDirectory?: string;
+
+  MongoConnectionString?: string | undefined;
+  Owner?: string;
+
+  RegisterDefaults?: Array<DefaultCommands> | boolean;
+
+  PREFIX? : string ;
+}
+
+
+
 /**
  * The main Ark feature, checks foreach message to check if it triggers a command
  * 
  * @param client The discord client to build upon
  * @param options the ark client options @type handlerOptions
  */
-
 export default class HandlerClient {
   public readonly client: discord.Client;
-  public Options: handlerOptions;
-  private Commands : string[] = [];
-  private CommandsIndexing : Map<string, number> = new Map();
+  public Options: HandlerClientOptions;
+  public Commands : string[] = [];
+  public CommandsIndexing : Map<string, number> = new Map();
   public REST : discord.REST = new discord.REST({version: '10'})
 
-  constructor(client: discord.Client, options: handlerOptions) {
+  constructor(client: discord.Client, options: HandlerClientOptions) {
     this.Options = options
     this.client = client
     this.REST.setToken(client.token as string)
@@ -28,7 +50,8 @@ export default class HandlerClient {
 
       for(const file of files){
         const ThisInfo = require(this.Options.CommandsDirectory + '/' + file).default as Command;
-        this.Commands.push(file)
+        this.Commands.push(this.Options.CommandsDirectory + '/' + file)
+
         this.CommandsIndexing.set(file.slice(0,-3),this.Commands.length-1)
 
         const consolelength = `Registrando comando <${file.slice(0,-3)}>`.length
@@ -53,6 +76,30 @@ export default class HandlerClient {
           console.log('')
         }
         
+      }
+
+
+        if(this.Options.RegisterDefaults){
+          if(typeof this.Options.RegisterDefaults === 'boolean'){
+        const files2 = fs.readdirSync(__dirname + "/DefaultCommands");
+
+          for(const  file of files2){
+            this.Commands.push(__dirname + '/DefaultCommands/'+file)
+            this.CommandsIndexing.set(file.slice(0,-3),this.Commands.length-1)
+          }
+        }else{
+          this.Options.RegisterDefaults.forEach((element) => {
+          
+            this.Commands.push(__dirname + '/DefaultCommands/'+element+'.ts')
+            this.CommandsIndexing.set(element,this.Commands.length-1)
+
+          })
+
+          console.log(this.Commands)
+
+        }
+
+        console.log(chalk.bgCyan("Registering default commands"))
       }
 
       console.log(chalk.blue("|>-----------#  #------------<|"))
@@ -82,9 +129,8 @@ export default class HandlerClient {
             if(!commandName) return
 
             
-            
             if(this.CommandsIndexing.has(commandName)){
-              const command = require(this.Options.CommandsDirectory! + `/${this.Commands[this.CommandsIndexing.get(commandName) as number]}`).default as Command
+              const command = require( this.Commands[this.CommandsIndexing.get(commandName)!]).default as Command
               Handler(command,message,this)
             }
           }
@@ -95,7 +141,6 @@ export default class HandlerClient {
 
     }//Roda por todos os comandos fazendo as configurações iniciais
     
-
   }
 
 }

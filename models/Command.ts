@@ -41,7 +41,7 @@ export default class CommandInfoClass {
    */
   public hidden?: boolean = false;
   /**
-   * @sumary The main part of the command that is executed
+   *  The main part of the command that is executed
    * 
    * @param Message - The message that triggered the command
    * 
@@ -49,7 +49,6 @@ export default class CommandInfoClass {
    * 
    * @param Client - The project client
    * 
-   * @returns true if the command was executed successfully, otherwise false
    */
   public Callback!: (Message: discord.Message, Args: string | string[], Client: HandlerClient) => Promise<void>;
   /**
