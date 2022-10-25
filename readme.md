@@ -3,8 +3,9 @@
 
 <h2> Arkhandler is a helper for discord bot creation, its use is simple and intuitive and performance is the best among others </h2>
 
-#### Usage
+![Ark Handler](https://user-images.githubusercontent.com/35808867/197870980-f0b3f511-687d-4ad1-8e10-ccc895b018e1.png)
 
+#### Usage
 
 <h3> First, we create the discord client instance and set it up and running </h3>
 
