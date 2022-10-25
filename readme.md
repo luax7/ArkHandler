@@ -7,8 +7,8 @@
 
 
 <h3> First, we create the discord client instance and set it up and running </h3>
+
 ```
-  
   const Client = new discord.Client({
     intents: 
     [
@@ -18,13 +18,13 @@
     ]
 
 })
-
 ```
+
 ###### Note that this is the bare minimum for the handler work, you can server your needs as you wish
 
 <h3> Next, its time to create our Ark Handler intance </h3>
 
-```
+
   const Handler = new Ark(Client,{
     Owner: "YourName#123",
     CommandsDirectory: __dirname + '/commands',
@@ -33,5 +33,5 @@
     RegisterDefaults: true
 })
 
-```
+
 
