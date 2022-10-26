@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var discord = require("discord.js");
 var fs = require("fs");
 var Handler_1 = require("../Handler");
-var chalk_1 = require("chalk");
 /**
  * The main Ark feature, checks foreach message to check if it triggers a command
  *
@@ -32,9 +31,9 @@ var HandlerClient = /** @class */ (function () {
                     str += '-';
                 }
                 str += '|';
-                console.log(chalk_1.default.blue(str));
-                console.log(chalk_1.default.blue("|") + chalk_1.default.green(chalk_1.default.underline("Registrando comando " + chalk_1.default.bold("<" + file.slice(0, -3) + '>'))) + chalk_1.default.blue(' |'));
-                console.log(chalk_1.default.blue(str));
+                console.log((str));
+                console.log(("|") + (("Registrando comando " + ("<" + file.slice(0, -3) + '>'))) + (' |'));
+                console.log((str));
                 console.log('');
                 if (ThisInfo.Aliases) {
                     ThisInfo.Aliases.forEach(function (element) {
@@ -60,17 +59,17 @@ var HandlerClient = /** @class */ (function () {
                     });
                     console.log(this.Commands);
                 }
-                console.log(chalk_1.default.bgCyan("Registering default commands"));
+                console.log(("Registering default commands"));
             }
-            console.log(chalk_1.default.blue("|>-----------#  #------------<|"));
+            console.log(("|>-----------#  #------------<|"));
             console.log(' ');
-            console.log(" " + chalk_1.default.bold(chalk_1.default.underline(chalk_1.default.green("Registrando Features"))));
+            console.log(" " + ("Registrando Features"));
             if (this.Options.FeaturesDirectory) {
                 var feats = fs.readdirSync(this.Options.FeaturesDirectory);
                 for (var _b = 0, feats_1 = feats; _b < feats_1.length; _b++) {
                     var FeatName = feats_1[_b];
                     var feat = require(this.Options.FeaturesDirectory + "/".concat(FeatName)).default;
-                    console.log("Registrando feature : " + chalk_1.default.bold(FeatName.slice(0, -3)));
+                    console.log("Registrando feature : " + (FeatName.slice(0, -3)));
                     feat.Callback(this.client, this);
                 }
             }
