@@ -44,15 +44,48 @@ export default class HandlerClient {
     this.client = client
     this.REST.setToken(client.token as string)
 
+    /**
+     * 
+     * Register the in <CommandsDirectory>
+     * Uses the format
+     * 
+     *    | ------------------------------- |
+     *    |  Registrando comando <Command>  |
+     *    | ------------------------------- |
+     *  
+     * ➡ Registering Alias <Alias>
+     * 
+     * 
+     * Also registers the default commands according to <RegisterDefaults>
+     */
     if(options.CommandsDirectory){
-      const files = fs.readdirSync(this.Options.CommandsDirectory!)
 
+
+
+      //Starts registering the commands in the folder
+      const files = fs.readdirSync(this.Options.CommandsDirectory!)
       for(const file of files){
+
+        /**
+         * 
+         * Seeks for the commands in the folder
+         * 
+         *  | |
+         *  | |Then registers it in the Local Commands Array as a Path
+         *  | |Like C:\\NiceAndBeatyfulPath\\commands/Command
+         *  | |
+         *  | |Register a Alias or Command in the local coomandIndexing Map
+         *  | |With this format: | <Alias or Name> => Index in the Commands var |
+         *  | |
+         * 
+         */
         const ThisInfo = require(this.Options.CommandsDirectory + '/' + file).default as Command;
         this.Commands.push(this.Options.CommandsDirectory + '/' + file)
 
         this.CommandsIndexing.set(file.slice(0,-3),this.Commands.length-1)
 
+
+        //#region Beauty bullshit
         const consolelength = `Registrando comando <${file.slice(0,-3)}>`.length
         let str = '|'
         for(var i = 0; i < consolelength+1;i++){
@@ -65,9 +98,10 @@ export default class HandlerClient {
         console.log((str))
         
         console.log('')
-
+        //#endregion
+        
+        //Aliases
         if(ThisInfo.Aliases){
-          
           ThisInfo.Aliases.forEach((element : string) => {
             console.log('➡ Registrando Alias ' + element)
             this.CommandsIndexing.set(element,this.Commands.length-1)
@@ -77,7 +111,12 @@ export default class HandlerClient {
         
       }
 
-
+      /**
+       * 
+       * After that register the Default Commands in the same way as the normal commands
+       * but now, using the relative path
+       * 
+       */
         if(this.Options.RegisterDefaults){
           if(typeof this.Options.RegisterDefaults === 'boolean'){
         const files2 = fs.readdirSync(__dirname + "/DefaultCommands");
@@ -94,7 +133,7 @@ export default class HandlerClient {
 
           })
 
-          console.log(this.Commands)
+          console.log(this.CommandsIndexing)
 
         }
 
@@ -103,9 +142,14 @@ export default class HandlerClient {
 
       console.log(("|>-----------#  #------------<|"))
       console.log(' ')
-      console.log(" " +  ( "Registrando Features"))
-
+      /**
+       * 
+       * Loops through all the features that are available
+       * and seting it on
+       * 
+       */
       if(this.Options.FeaturesDirectory){
+        console.log(" " +  ( "Registrando Features"))
 
         const feats = fs.readdirSync(this.Options.FeaturesDirectory)
 
@@ -117,7 +161,13 @@ export default class HandlerClient {
 
       }
 
-      if(this.Options.CommandsDirectory){
+      /**
+       * 
+       * if the client has Commands available, then sets a listener
+       * to hear for all the messages in available channels that start with the given prefix
+       * 
+       */
+      if(this.Commands.length > 0){
         this.client.on('messageCreate', (message) => {
           if(message.content.toLowerCase().startsWith(this.Options.PREFIX || 'calltest')){
             const data = message.content.split(' ')
