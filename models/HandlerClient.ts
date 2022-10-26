@@ -2,7 +2,6 @@ import * as discord from 'discord.js'
 import * as fs from 'fs'
 import {Command, Feature} from '../'
 import Handler from '../Handler';
-import chalk from 'chalk'
 
 /**
  * Defines the default commands embed in the handler
@@ -61,9 +60,9 @@ export default class HandlerClient {
         }
         str += '|'
 
-        console.log(chalk.blue(str))
-        console.log(chalk.blue("|") + chalk.green(chalk.underline(`Registrando comando ` + chalk.bold("<" + file.slice(0,-3) + '>'))) + chalk.blue(' |'))
-        console.log(chalk.blue(str))
+        console.log((str))
+        console.log(("|") + ((`Registrando comando ` + ("<" + file.slice(0,-3) + '>'))) + (' |'))
+        console.log((str))
         
         console.log('')
 
@@ -99,12 +98,12 @@ export default class HandlerClient {
 
         }
 
-        console.log(chalk.bgCyan("Registering default commands"))
+        console.log(("Registering default commands"))
       }
 
-      console.log(chalk.blue("|>-----------#  #------------<|"))
+      console.log(("|>-----------#  #------------<|"))
       console.log(' ')
-      console.log(" " + chalk.bold(chalk.underline(chalk.green("Registrando Features"))))
+      console.log(" " +  ( "Registrando Features"))
 
       if(this.Options.FeaturesDirectory){
 
@@ -112,7 +111,7 @@ export default class HandlerClient {
 
         for(const FeatName of feats) {
           const feat = require(this.Options.FeaturesDirectory + `/${FeatName}`).default as Feature;
-          console.log(`Registrando feature : ` + chalk.bold(FeatName.slice(0,-3)));
+          console.log(`Registrando feature : ` +  (FeatName.slice(0,-3)));
           feat.Callback(this.client,this)
         }
 
