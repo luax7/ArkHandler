@@ -1,4 +1,4 @@
-import * as discord from 'discord.js';
+import { Client } from 'discord.js';
 import HandlerClient from './HandlerClient';
 /**
  *
@@ -18,7 +18,7 @@ export default class Features {
      * @param HandlerClient The ArkClient to get information
      * >
      */
-    Callback: (client: discord.Client, HandlerClient: HandlerClient) => Promise<void>;
+    Callback: (client: Client, HandlerClient: HandlerClient) => Promise<void>;
     /**
      * @description Says if the feature is enabled for all the guilds that the bot is
      */
