@@ -154,9 +154,13 @@ export default class HandlerClient {
         const feats = fs.readdirSync(this.Options.FeaturesDirectory)
 
         for(const FeatName of feats) {
+          if(!FeatName.endsWith(".ts")) continue;
+
           const feat = require(this.Options.FeaturesDirectory + `/${FeatName}`).default as Feature;
+          
           console.log(`Registrando feature : ` +  (FeatName.slice(0,-3)));
           feat.Callback(this.client,this)
+
         }
 
       }
