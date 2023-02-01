@@ -1,6 +1,11 @@
 import  * as discord from 'discord.js';
 import { Snowflake, SlashCommandBuilder} from 'discord.js';
 import HandlerClient from './HandlerClient';
+type CommandCallbackArgs = {
+  Message: discord.Message,
+  Args: string | string[],
+  Client: HandlerClient
+}
 
 /**
  * @sumary The class that defines commands
@@ -50,7 +55,7 @@ export default class CommandInfoClass {
    * @param Client - The project client
    * 
    */
-  public Callback!: (Message: discord.Message, Args: string | string[], Client: HandlerClient) => Promise<void>;
+  public Callback!: (Callback : CommandCallbackArgs) => Promise<void>;
   /**
    * 
    *  The tipes of aruments that will be passed to the command

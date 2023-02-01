@@ -11,8 +11,6 @@ const Handler = async (Command : Command, message: discordjs.Message, client: Ha
 
       if(commandInfo){
 
-        console.log(commandInfo)
-      
         const data = message.content.split(' ').slice(1);
         const CommandName = data.shift();
 
@@ -99,7 +97,11 @@ const Handler = async (Command : Command, message: discordjs.Message, client: Ha
         /*
                     Executa a função 
                 */
-          commandInfo.Callback(message, args!, client);
+          commandInfo.Callback({
+            Message : message,
+            Args : args,
+            Client : client
+          });
       }
     }
   }

@@ -2,7 +2,7 @@ import { Command } from "../..";
 
 export default {
 
-    Callback(Message, Args, Client) {
+    Callback({Message}) {
         Message.reply("Pong!")
     },
 

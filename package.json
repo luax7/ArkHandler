@@ -2,7 +2,7 @@
   "name": "ark-handler",
   "version": "2.3.4",
   "description": "Command/Feature handler for discord.js",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {},
   "repository": {
     "type": "git",

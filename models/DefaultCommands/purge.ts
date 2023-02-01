@@ -4,7 +4,10 @@ import {TextChannel} from 'discord.js'
 
 export default {
     RequiredPermissions:["ManageMessages"],
-    Callback(Message, Args, Client) {
+    Callback({
+        Args,
+        Message
+    }) {
         let number = parseInt(Args[0])
 
         if(number > 99 ) number = 99;

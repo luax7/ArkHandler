@@ -1,7 +1,9 @@
 import * as discord from 'discord.js'
+import EventEmitter from 'events';
 import * as fs from 'fs'
 import {Command, Feature} from '../'
 import Handler from '../Handler';
+
 
 /**
  * Defines the default commands embed in the handler
@@ -32,14 +34,29 @@ type HandlerClientOptions = {
  * @param client The discord client to build upon
  * @param options the ark client options @type handlerOptions
  */
-export default class HandlerClient {
+export default class HandlerClient extends EventEmitter {
   public readonly client: discord.Client;
   public Options: HandlerClientOptions;
-  public Commands : string[] = [];
   public CommandsIndexing : Map<string, number> = new Map();
+  public Commands : Command[] = [];
   public REST : discord.REST = new discord.REST({version: '10'})
 
+  public AddCommand(CommandName : string, commandObject : Command){
+
+    this.Commands.push(commandObject)
+    this.CommandsIndexing.set(CommandName.endsWith('.ts') ? CommandName.slice(0,-3) : CommandName, this.Commands.length - 1 )
+
+    if(commandObject.Aliases) {
+      commandObject.Aliases.forEach((Alias) => {
+        this.CommandsIndexing.set(Alias, this.Commands.length - 1 )
+      })
+    }
+    console.log(this.CommandsIndexing)
+  }
+
   constructor(client: discord.Client, options: HandlerClientOptions) {
+    super({captureRejections : true})
+
     this.Options = options
     this.client = client
     this.REST.setToken(client.token as string)
@@ -58,141 +75,72 @@ export default class HandlerClient {
      * 
      * Also registers the default commands according to <RegisterDefaults>
      */
-    if(options.CommandsDirectory){
+    if(this.Options.CommandsDirectory){
+      for(const CommandName of fs.readdirSync(this.Options.CommandsDirectory)){
 
-
-
-      //Starts registering the commands in the folder
-      const files = fs.readdirSync(this.Options.CommandsDirectory!)
-      for(const file of files){
-
-        /**
-         * 
-         * Seeks for the commands in the folder
-         * 
-         *  | |
-         *  | |Then registers it in the Local Commands Array as a Path
-         *  | |Like C:\\NiceAndBeatyfulPath\\commands/Command
-         *  | |
-         *  | |Register a Alias or Command in the local coomandIndexing Map
-         *  | |With this format: | <Alias or Name> => Index in the Commands var |
-         *  | |
-         * 
-         */
-        const ThisInfo = require(this.Options.CommandsDirectory + '/' + file).default as Command;
-        this.Commands.push(this.Options.CommandsDirectory + '/' + file)
-
-        this.CommandsIndexing.set(file.slice(0,-3),this.Commands.length-1)
-
-
-        //#region Beauty bullshit
-        const consolelength = `Registrando comando <${file.slice(0,-3)}>`.length
-        let str = '|'
-        for(var i = 0; i < consolelength+1;i++){
-          str += '-'
-        }
-        str += '|'
-
-        console.log((str))
-        console.log(("|") + ((`Registrando comando ` + ("<" + file.slice(0,-3) + '>'))) + (' |'))
-        console.log((str))
+        console.log("Registering command: " + CommandName.slice(0,-3))
+        if(!CommandName.endsWith(".ts")) continue;
+        const command = require(this.Options.CommandsDirectory + `/${CommandName}`).default as Command
         
-        console.log('')
-        //#endregion
-        
-        //Aliases
-        if(ThisInfo.Aliases){
-          ThisInfo.Aliases.forEach((element : string) => {
-            console.log('➡ Registrando Alias ' + element)
-            this.CommandsIndexing.set(element,this.Commands.length-1)
-          })
-          console.log('')
-        }
-        
-      }
-
+        if(command instanceof Command) {
+        this.AddCommand(CommandName, command)}
+      } 
       /**
-       * 
-       * After that register the Default Commands in the same way as the normal commands
-       * but now, using the relative path
-       * 
+       * Register the default command(s) 
        */
-        if(this.Options.RegisterDefaults){
-          if(typeof this.Options.RegisterDefaults === 'boolean'){
-        const files2 = fs.readdirSync(__dirname + "/DefaultCommands");
+      if(typeof this.Options.RegisterDefaults === "boolean" || typeof this.Options.RegisterDefaults === "undefined"){
+        if(this.Options.RegisterDefaults === true || this.Options.RegisterDefaults === undefined){
+          console.log("Registrando comandos padrões")
+          for(const DefaultCommand of fs.readdirSync(__dirname + "/DefaultCommands/")){
+            if(!DefaultCommand.endsWith(".ts")) continue;
 
-          for(const  file of files2){
-            this.Commands.push(__dirname + '/DefaultCommands/'+file)
-            this.CommandsIndexing.set(file.slice(0,-3),this.Commands.length-1)
+            this.AddCommand(DefaultCommand, require(`./DefaultCommands/${DefaultCommand}`).default as Command)
           }
-        }else{
-          this.Options.RegisterDefaults.forEach((element) => {
-          
-            this.Commands.push(__dirname + '/DefaultCommands/'+element+'.ts')
-            this.CommandsIndexing.set(element,this.Commands.length-1)
-
-          })
-
-          console.log(this.CommandsIndexing)
-
         }
-
-        console.log(("Registering default commands"))
+      } else {
+        for(const DefaultCommand of fs.readdirSync(__dirname + "/DefaultCommands/")){
+          this.Options.RegisterDefaults.forEach((element) => {
+            if(DefaultCommand.slice(0,-3) === element){
+              this.AddCommand(DefaultCommand, require(`./DefaultCommands/${element}.ts`).default as Command)
+            }
+          })
+        }
       }
-
-      console.log(("|>-----------#  #------------<|"))
-      console.log(' ')
       /**
-       * 
-       * Loops through all the features that are available
-       * and seting it on
-       * 
+       * -------------------
+       * Register Features
        */
       if(this.Options.FeaturesDirectory){
-        console.log(" " +  ( "Registrando Features"))
+        console.log("Registando Features");
+        
+        for(const feature of fs.readdirSync(this.Options.FeaturesDirectory)) {
 
-        const feats = fs.readdirSync(this.Options.FeaturesDirectory)
+          const featureObject = require(`${this.Options.FeaturesDirectory}/${feature}`).default as Feature;
+          console.log(`Registrando feature : ${feature}`)
 
-        for(const FeatName of feats) {
-          if(!FeatName.endsWith(".ts")) continue;
-
-          const feat = require(this.Options.FeaturesDirectory + `/${FeatName}`).default as Feature;
-          
-          console.log(`Registrando feature : ` +  (FeatName.slice(0,-3)));
-          feat.Callback(this.client,this)
+          featureObject.Callback(this.client , this)
 
         }
-
       }
-
       /**
-       * 
-       * if the client has Commands available, then sets a listener
-       * to hear for all the messages in available channels that start with the given prefix
-       * 
+       * Listener for commands
        */
-      if(this.Commands.length > 0){
+      if(this.Options.CommandsDirectory) {
         this.client.on('messageCreate', (message) => {
-          if(message.content.toLowerCase().startsWith(this.Options.PREFIX || 'calltest')){
-            const data = message.content.split(' ')
+          if(message.content.split(' ').join('').toLowerCase().startsWith(this.Options.PREFIX || "test")){
+            const CommandName = message.content.slice(this.Options.PREFIX?.length).trim()
             
-            const prefix = data.shift();
-            const commandName = data.shift();
-            
-            if(!commandName) return
+            if(this.CommandsIndexing.has(CommandName)){
+              const CommandObject = this.Commands[this.CommandsIndexing.get(CommandName)!]
 
-            
-            if(this.CommandsIndexing.has(commandName)){
-              const command = require( this.Commands[this.CommandsIndexing.get(commandName)!]).default as Command
-              Handler(command,message,this)
+              Handler(CommandObject,message,this)
             }
+
           }
         })
       }
-    
 
-
-    }//Roda por todos os comandos fazendo as configurações iniciais
+    }
     
   }
 
